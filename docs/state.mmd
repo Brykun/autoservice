@@ -2,20 +2,20 @@ stateDiagram-v2
     [*] --> AppointmentRequested : власник подає дані
     AppointmentRequested --> AppointmentConfirmed : вільний слот і дані коректні
     AppointmentRequested --> AppointmentCancelled : слот недоступний або власник скасовує
-    AppointmentRequested --> AppointmentRequested : неповні чи некоректні дані; показати поля для виправлення
+    AppointmentRequested --> AppointmentRequested : неповні чи некоректні дані, показати поля для виправлення
     AppointmentRequested --> AppointmentConfirmed : власник підтвердив інший доступний час
     AppointmentConfirmed --> Diagnosis : автомобіль прийнято
     Diagnosis --> EstimatePrepared : приймальник створив замовлення і кошторис
     EstimatePrepared --> AwaitingOwnerApproval : запропоновано додаткові роботи
     EstimatePrepared --> WorkInProgress : додаткових робіт немає
     AwaitingOwnerApproval --> WorkInProgress : погоджено додаткові роботи
-    AwaitingOwnerApproval --> WorkInProgress : відхилено; базовий обсяг збережено
-    AwaitingOwnerApproval --> WorkInProgress : рішення не отримано до дедлайну; виконати лише базові роботи
+    AwaitingOwnerApproval --> WorkInProgress : відхилено, базовий обсяг збережено
+    AwaitingOwnerApproval --> WorkInProgress : рішення не отримано до дедлайну, виконати лише базові роботи
     WorkInProgress --> WorkOrderCompleted : усі погоджені роботи завершено
-    WorkInProgress --> WorkOrderCancelled : замовлення скасовано; виконані роботи і запчастини збережено
-    WorkInProgress --> WorkOrderUnfinished : ремонт тимчасово незавершено; виконані етапи збережено
+    WorkInProgress --> WorkOrderCancelled : замовлення скасовано, виконані роботи і запчастини збережено
+    WorkInProgress --> WorkOrderUnfinished : ремонт тимчасово незавершено, виконані етапи збережено
     WorkOrderUnfinished --> WorkInProgress : продовжено виконання існуючого замовлення
-    WorkOrderUnfinished --> WorkOrderCancelled : замовлення остаточно скасовано; дані збережено
+    WorkOrderUnfinished --> WorkOrderCancelled : замовлення остаточно скасовано, дані збережено
     AppointmentCancelled --> [*]
     WorkOrderCompleted --> [*]
     WorkOrderCancelled --> [*]
