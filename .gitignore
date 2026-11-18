@@ -1,0 +1,27 @@
+# Java
+target/
+build/
+*.class
+*.jar
+.gradle/
+
+# Build output and environment
+dist/
+build/
+node_modules/
+*.log
+.env*
+
+# Python tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local and editor files
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/

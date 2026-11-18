@@ -1,0 +1,118 @@
+classDiagram
+    class ServiceParticipant {
+        <<abstract>>
+        #String participantId
+        #String fullName
+        #String phone
+        #ServiceParticipant(id, name, phone)
+        +getParticipantId() String
+        +getRole()* String
+    }
+
+    class VehicleOwner {
+        +List~Vehicle~ vehicles
+        +VehicleOwner(id, name, phone)
+        +getRole() String
+        +requestAppointment(scheduler, vehicle, dateTime, reason)
+        +decideOnAdditionalWork(work, approved)
+    }
+
+    class Receptionist {
+        +Receptionist(id, name, phone)
+        +getRole() String
+        +createWorkOrder(appointment) WorkOrder
+    }
+
+    class Mechanic {
+        +Mechanic(id, name, phone)
+        +getRole() String
+        +executeWork(order) void
+        +recordPart(order, part, quantity) void
+    }
+
+    class WorkExecutor {
+        <<interface>>
+        +executeWork(order) void
+    }
+
+    class Vehicle {
+        +String vin
+        +String make
+        +String model
+        +int year
+        +Vehicle(vin, make, model, year)
+    }
+
+    class Appointment {
+        +String appointmentId
+        +DateTime scheduledAt
+        +String reason
+        +AppointmentStatus status
+        +Appointment(id, vehicle, scheduledAt, reason)
+        +confirm() void
+        +cancel() void
+        +reschedule(dateTime) void
+        +reschedule(dateTime, reason) void
+    }
+
+    class AppointmentScheduler {
+        -Set~DateTime~ availableSlots
+        +AppointmentScheduler(availableSlots)
+        +bookAppointment(owner, vehicle, dateTime, reason) Appointment
+        +bookAppointment(appointment) Appointment
+    }
+
+    class WorkOrder {
+        +String orderId
+        +WorkOrderStatus status
+        +WorkOrder(id, appointment, estimate)
+        +addPart(part, quantity) void
+        +complete() void
+        +cancel() void
+    }
+
+    class Estimate {
+        +Decimal laborCost
+        +List~AdditionalWork~ additionalWorks
+        +Estimate(laborCost)
+        +calculateTotal() Decimal
+    }
+
+    class AdditionalWork {
+        +String description
+        +Decimal cost
+        +ApprovalStatus approvalStatus
+        +AdditionalWork(description, cost)
+        +approve() void
+        +reject() void
+    }
+
+    class SparePart {
+        +String partNumber
+        +String name
+        +Decimal unitCost
+        +SparePart(partNumber, name, unitCost)
+    }
+
+    ServiceParticipant <|-- VehicleOwner
+    ServiceParticipant <|-- Receptionist
+    ServiceParticipant <|-- Mechanic
+    WorkExecutor <|.. Mechanic
+    VehicleOwner "1" o-- "0..*" Vehicle : володіє
+    Vehicle "1" --> "0..*" Appointment : записується на
+    AppointmentScheduler ..> VehicleOwner : перевіряє власника
+    AppointmentScheduler ..> Vehicle : перевіряє автомобіль
+    AppointmentScheduler ..> Appointment : реєструє слот
+    Receptionist ..> Appointment : приймає підтверджений запис
+    Receptionist ..> WorkOrder : створює
+    WorkOrder "1" --> "1" Appointment : оформлено за
+    WorkOrder "1" *-- "1" Estimate : містить
+    Estimate "1" *-- "0..*" AdditionalWork : пропонує
+    WorkOrder "0..*" --> "0..*" SparePart : облік кількості
+    Mechanic ..> WorkOrder : виконує
+    Mechanic ..> SparePart : реєструє
+    VehicleOwner ..> AdditionalWork : погоджує або відхиляє
+
+    note for ServiceParticipant "getParticipantId() є final; підкласи перевизначають getRole()."
+    note for Appointment "reschedule() перевантажений двома сигнатурами."
+    note for WorkOrder "Створюється лише для підтвердженого Appointment."

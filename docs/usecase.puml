@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Власник авто" as Owner
+actor "Приймальник" as Receptionist
+actor "Механік" as Mechanic
+
+rectangle "Інформаційна система «Автосервіс»" {
+  usecase "Записатися на\nдіагностику" as UC_Appointment
+  usecase "Сформувати замовлення-\nнаряд і кошторис" as UC_WorkOrder
+  usecase "Виконати роботи та\nзареєструвати запчастини" as UC_Repair
+  usecase "Погодити або відхилити\nдодаткові роботи" as UC_Approval
+}
+
+Owner -- UC_Appointment
+Receptionist -- UC_WorkOrder
+Mechanic -- UC_Repair
+Owner -- UC_Approval
+Mechanic -- UC_Approval
+
+UC_WorkOrder ..> UC_Appointment : <<include>>
+UC_Repair ..> UC_WorkOrder : <<include>>
+UC_Approval ..> UC_Repair : <<extend>>
+@enduml

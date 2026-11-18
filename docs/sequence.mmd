@@ -1,0 +1,38 @@
+sequenceDiagram
+    actor Owner as Власник авто
+    participant Scheduler as AppointmentScheduler
+    actor Receptionist as Приймальник
+    participant Order as WorkOrder
+    participant Estimate as Estimate
+    actor Mechanic as Механік
+    participant Additional as AdditionalWork
+
+    Owner->>Scheduler: bookAppointment(vehicle, dateTime, reason)
+    Scheduler->>Scheduler: Перевірити вільний слот і дані
+    Scheduler-->>Owner: Appointment підтверджено
+
+    Receptionist->>Order: createWorkOrder(appointment)
+    Order->>Estimate: Створити кошторис базових робіт
+    Estimate-->>Receptionist: Кошторис підготовлено
+    Receptionist-->>Owner: Передати обсяг базових робіт
+
+    Mechanic->>Order: executeWork(order)
+    Mechanic->>Additional: Запропонувати додаткову роботу
+    Additional-->>Owner: Надіслати опис і вартість
+    Owner->>Additional: approve() або reject()
+
+    alt Власник погоджує
+        Additional->>Estimate: Додати до погодженого кошторису
+        Estimate->>Estimate: Перерахувати суму
+        Estimate-->>Mechanic: Дозволено виконати додаткову роботу
+        Mechanic->>Order: Виконати базові й погоджені роботи
+    else Власник відхиляє
+        Additional->>Estimate: Виключити з фінального кошторису
+        Estimate-->>Mechanic: Виконувати лише базові роботи
+        Mechanic->>Order: Продовжити базові роботи
+    end
+
+    Mechanic->>Order: recordPart(part, quantity)
+    Order-->>Mechanic: Запчастину та кількість зафіксовано
+    Mechanic->>Order: complete()
+    Order-->>Owner: Замовлення завершено
