@@ -17,7 +17,6 @@ Owner -- UC_Appointment
 Receptionist -- UC_WorkOrder
 Mechanic -- UC_Repair
 Owner -- UC_Approval
-Mechanic -- UC_Approval
 
 UC_WorkOrder ..> UC_Appointment : <<include>>
 UC_Repair ..> UC_WorkOrder : <<include>>

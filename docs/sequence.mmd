@@ -6,10 +6,27 @@ sequenceDiagram
     participant Estimate as Estimate
     actor Mechanic as Механік
     participant Additional as AdditionalWork
+    participant Part as SparePart
 
     Owner->>Scheduler: bookAppointment(vehicle, dateTime, reason)
     Scheduler->>Scheduler: Перевірити вільний слот і дані
-    Scheduler-->>Owner: Appointment підтверджено
+    alt Дані коректні й слот вільний
+        Scheduler-->>Owner: Appointment підтверджено
+    else Дані неповні або некоректні
+        break Запис відхилено
+            Scheduler-->>Owner: Відхилити запис і вказати поля для виправлення
+        end
+    else Слот зайнятий
+        Scheduler-->>Owner: Запропонувати інший доступний час
+        alt Власник підтверджує новий доступний час
+            Owner->>Scheduler: reschedule(dateTime)
+            Scheduler-->>Owner: Appointment підтверджено
+        else Власник не підтверджує новий час
+            break Запис не створено
+                Scheduler-->>Owner: Збережено лише відхилений/незавершений запит
+            end
+        end
+    end
 
     Receptionist->>Order: createWorkOrder(appointment)
     Order->>Estimate: Створити кошторис базових робіт
@@ -30,9 +47,30 @@ sequenceDiagram
         Additional->>Estimate: Виключити з фінального кошторису
         Estimate-->>Mechanic: Виконувати лише базові роботи
         Mechanic->>Order: Продовжити базові роботи
+    else Рішення не отримано до дедлайну
+        Additional->>Estimate: Не включати додаткову роботу
+        Estimate-->>Mechanic: Виконувати лише базові роботи до дедлайну
     end
 
-    Mechanic->>Order: recordPart(part, quantity)
-    Order-->>Mechanic: Запчастину та кількість зафіксовано
-    Mechanic->>Order: complete()
-    Order-->>Owner: Замовлення завершено
+    Mechanic->>Part: Перевірити запчастину у переліку
+    alt Запчастина відома
+        Mechanic->>Order: recordPart(part, quantity)
+        Order-->>Mechanic: Запчастину та кількість зафіксовано
+    else Запчастина поза базовим переліком
+        Mechanic->>Part: Додати SparePart з назвою і ціною
+        Mechanic->>Order: recordPart(newPart, quantity)
+        Mechanic->>Estimate: Додати вартість запчастини
+        Estimate-->>Mechanic: Кошторис оновлено
+    end
+
+    alt Скасувати замовлення
+        Mechanic->>Order: cancel()
+        Order-->>Order: Зберегти виконані роботи і запчастини
+        Order-->>Owner: Замовлення скасовано; дані збережено
+    else Незавершене замовлення
+        Mechanic->>Order: Зберегти поточний статус і виконані етапи
+        Order-->>Owner: Замовлення залишено незавершеним без втрати даних
+    else Роботи завершено
+        Mechanic->>Order: complete()
+        Order-->>Owner: Замовлення завершено
+    end
